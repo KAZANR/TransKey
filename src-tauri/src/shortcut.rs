@@ -1,5 +1,5 @@
 // 导入所需的 Tauri 相关模块
-use crate::shell_helper::{send_phrase, trans_and_replace_text};
+use crate::shell_helper::trans_and_replace_text;
 use crate::store::{get_settings, update_settings_field, HotkeyConfig};
 use std::str::FromStr;
 use std::sync::Arc;
@@ -139,29 +139,6 @@ pub fn init_shortcuts(app: &AppHandle) -> Result<(), String> {
         create_trans_handler(app.clone()),
     )?;
 
-    // 注册常用语快捷键
-    for phrase in settings.phrases {
-        let phrase_text = phrase.phrase.clone();
-        let app_handle = app.clone();
-
-        register_shortcut(
-            app,
-            &phrase.hotkey.modifiers,
-            &phrase.hotkey.key,
-            move |_app, _shortcut, event| {
-                if event.state() == ShortcutState::Pressed {
-                    let app_handle = app_handle.clone();
-                    let phrase_text = phrase_text.clone();
-                    tauri::async_runtime::spawn(async move {
-                        if let Err(e) = send_phrase(&app_handle, &phrase_text).await {
-                            println!("发送常用语失败: {:?}", e);
-                        }
-                    });
-                }
-            },
-        )?;
-    }
-
     Ok(())
 }
 
@@ -290,7 +267,7 @@ fn create_trans_handler(
                     // 写入错误日志，便于排查（release 版无控制台）
                     if let Ok(appdata) = std::env::var("APPDATA") {
                         let log_path = std::path::Path::new(&appdata)
-                            .join("com.DeepRant.app")
+                            .join("com.transkey.app")
                             .join("error.log");
                         use std::io::Write;
                         if let Ok(mut f) = std::fs::OpenOptions::new()

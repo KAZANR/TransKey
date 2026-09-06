@@ -1,78 +1,54 @@
-# DeepRant 游戏快捷翻译工具 🎮
+# 译键 TransKey ⌨️
 
 <div align="center">
-  <img src="src/assets/app-icon.png" alt="DeepRant Logo" width="200"/>
-  
+  <img src="app-icon.png" alt="TransKey Logo" width="200"/>
+
+  **一键即译的游戏快捷翻译工具**
+
   [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 </div>
 
-## 🖼️ 功能预览
-
-<div align="center">
-  <img src="src/assets/preview.png" alt="DeepRant Preview" width="800"/>
-</div>
-
 ## 📝 项目简介
 
-DeepRant 是一款专为游戏玩家设计的多语言快捷翻译工具。它能帮助您在国际服务器中快速进行文字交流，让语言不再成为跨服竞技的障碍。
+TransKey（译键）是一款为游戏玩家打造的极简快捷翻译工具。在国际服游戏里选中文字、按一下快捷键，翻译结果自动粘贴到聊天框——全程不用切出游戏。
+
+「译键」谐音「一键」：按一个键，译好一句话。
 
 ### ✨ 主要特性
 
-- 🚀 **快捷键翻译**：一键快速翻译，无需切出游戏
-- 🌍 **多语言支持**：支持全球主流语言之间的互相翻译
-- 🎭 **多种翻译模式**：
-  - 😈 嘴臭模式：地道的游戏黑话翻译
-  - 🎯 专业玩家模式：专业电竞用语
-  - 🤖 自动模式：智能识别场景
-- 📚 **常用语管理**：可自定义保存常用短语
-- 🎛️ **翻译引擎选择**：支持多种主流翻译模型
-
-## 🎯 使用场景
-
-- 跨服竞技对战
-- 国际服务器社交
-- 多人在线游戏交流
-- 电竞比赛实时沟通
+- 🚀 **一键翻译**：选中文字 → 按快捷键 → 自动翻译并粘贴
+- 🌍 **多语言互译**：中文、英文、日文、韩文、俄文等主流语言
+- ⚡ **开箱即用**：内置硅基流动免费模型，无需配置即可使用
+- 🔌 **自定义引擎**：兼容任意 OpenAI 接口的自定义模型
+- 🪶 **极简轻量**：Tauri 构建，单窗口设置页，占用极小
 
 ## 🚀 快速开始
 
-1. 从 [Releases](https://github.com/liseami/DeepRant/releases) 下载最新版本
-2. 安装程序
-3. 运行 DeepRant
-4. 设置您喜好的快捷键
-5. 开始游戏，享受无障碍交流！
+1. 从 [Releases](https://github.com/KAZANR/FC3S/releases) 下载最新版本
+2. 安装并运行 TransKey
+3. 选择翻译方向和引擎（默认免费引擎可直接用）
+4. 进游戏，选中文字，按快捷键！
 
 ## ⌨️ 默认快捷键
 
-- `CMD + T`: 快速翻译
+- macOS：`⌘ + T`
+- Windows：`Alt + T`
 
+（可在设置页点击快捷键按钮重新录制）
 
-## 💡 使用技巧
+## 💡 使用方法
 
 1. 在游戏中选中要翻译的文字
-2. 按下设定的快捷键
-3. 翻译结果会自动复制到剪贴板
-4. 在游戏聊天框中粘贴即可
-
-## 🆓 完全免费
-
-DeepRant 目前完全免费使用，我们相信游戏交流应该没有门槛。
+2. 按下翻译快捷键
+3. 翻译结果会自动替换/粘贴到输入框
+4. 回车发送
 
 ## 🛠️ 技术栈
 
-- 🖥️ **跨平台框架**：[Tauri](https://tauri.app/) - 使用 Rust 构建的轻量级跨平台框架
-- ⚛️ **前端框架**：
-  - React 18
-  - Vite
-  - TailwindCSS
-  - Framer Motion
-- 🦀 **后端技术**：
-  - Rust
-  - Tauri API
-  - Global Shortcut
-  - Store Plugin
-  - Clipboard Manager
+- 🖥️ **跨平台框架**：[Tauri](https://tauri.app/)（Rust + WebView）
+- ⚛️ **前端**：React 18 + Vite + TailwindCSS
+- 🦀 **后端**：Rust + 全局快捷键 / 剪贴板 / 存储插件
 
 ## 👨‍💻 开发指南
 
@@ -80,45 +56,16 @@ DeepRant 目前完全免费使用，我们相信游戏交流应该没有门槛�
 
 - Node.js 16+
 - Rust 1.70+
-- macOS: Xcode Command Line Tools
-- Windows: Visual Studio C++ 构建工具
-
-### 安装依赖
-
-```bash
-# 安装依赖
-npm install
-
-# 或使用 yarn
-yarn
-```
+- macOS：Xcode Command Line Tools
+- Windows：Visual Studio C++ 构建工具
 
 ### 开发命令
 
 ```bash
-# 开发模式
-npm run tauri dev
-
-# 清理构建缓存
-npm run clean
+npm install        # 安装依赖
+npm run tauri dev  # 开发模式
+npm run tauri build # 打包
 ```
-
-### 打包命令
-
-```bash
-# macOS (Intel & Apple Silicon)
-npm run tauri build
-
-# macOS (仅 Apple Silicon)
-npm run build:mac-arm
-
-# Windows
-npm run tauri build
-```
-
-## 🤝 贡献指南
-
-欢迎提交 Issue 和 Pull Request！
 
 ## 📜 开源协议
 

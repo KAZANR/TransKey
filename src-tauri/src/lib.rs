@@ -1,4 +1,4 @@
-use crate::store::{initialize_settings, get_settings as store_get_settings, get_scenes as store_get_scenes, save_scenes as store_save_scenes};
+use crate::store::{initialize_settings, get_settings as store_get_settings};
 use tauri::Manager;
 pub mod ai_translator;
 pub mod shell_helper;
@@ -17,11 +17,6 @@ fn get_version(app_handle: tauri::AppHandle) -> String {
 }
 
 #[tauri::command]
-fn greet(name: &str) -> String {
-    format!("Hello, {}! You've been greeted from Rust!", name)
-}
-
-#[tauri::command]
 async fn update_translator_shortcut(
     app_handle: tauri::AppHandle,
     keys: Vec<String>,
@@ -34,20 +29,10 @@ async fn get_settings(app_handle: tauri::AppHandle) -> Result<store::AppSettings
     store_get_settings(&app_handle).map_err(|e| e.to_string())
 }
 
-#[tauri::command]
-async fn get_scenes(app_handle: tauri::AppHandle) -> Result<Vec<store::GameScene>, String> {
-    store_get_scenes(&app_handle).map_err(|e| e.to_string())
-}
-
-#[tauri::command]
-async fn save_scenes(app_handle: tauri::AppHandle, scenes: Vec<store::GameScene>) -> Result<(), String> {
-    store_save_scenes(&app_handle, scenes).map_err(|e| e.to_string())
-}
-
 pub fn run() {
     println!("Starting application...");
 
-    let mut builder = tauri::Builder::default()
+    let builder = tauri::Builder::default()
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .plugin(tauri_plugin_store::Builder::default().build())
@@ -80,30 +65,25 @@ pub fn run() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
-            greet,
             update_translator_shortcut,
             log_to_backend,
             get_settings,
-            get_version,
-            get_scenes,
-            save_scenes
+            get_version
         ]);
 
     // 只在非Windows系统上添加窗口事件监听
     #[cfg(not(target_os = "windows"))]
-    {
-        builder = builder.on_window_event(|window, event| match event {
-            tauri::WindowEvent::CloseRequested { api, .. } => {
-                window.hide().unwrap();
-                #[cfg(target_os = "macos")]
-                let _ = window
-                    .app_handle()
-                    .set_activation_policy(tauri::ActivationPolicy::Accessory);
-                api.prevent_close();
-            }
-            _ => {}
-        });
-    }
+    let builder = builder.on_window_event(|window, event| match event {
+        tauri::WindowEvent::CloseRequested { api, .. } => {
+            window.hide().unwrap();
+            #[cfg(target_os = "macos")]
+            let _ = window
+                .app_handle()
+                .set_activation_policy(tauri::ActivationPolicy::Accessory);
+            api.prevent_close();
+        }
+        _ => {}
+    });
 
     builder
         .run(tauri::generate_context!())
