@@ -5,7 +5,7 @@ import * as FlagIcons from 'country-flag-icons/react/3x2';
 import { StoreProvider, useStore } from './components/StoreProvider';
 import DropdownMenu from './components/DropdownMenu';
 import { showSuccess, showError } from './utils/toast';
-import { Translate, Repeat01, KeyboardAlt, Spinner, Ai01, ChevronRight, Eye, EyeOff, Globe, CheckTick } from './icons';
+import { Translate, Repeat01, KeyboardAlt, Spinner, Ai01, ChevronRight, Eye, EyeOff, Globe, CheckTick, Settings02 } from './icons';
 import appIcon from './assets/app-icon.png';
 
 const LANGUAGES = {
@@ -499,13 +499,94 @@ function ThemeCard({ delay }) {
     );
 }
 
+function HomePage() {
+    return (
+        <>
+            <header className="card-rise flex items-center gap-3.5 px-1 pb-1">
+                <img
+                    src={appIcon}
+                    alt="TransKey"
+                    className="h-11 w-11 rounded-[14px]"
+                />
+                <div>
+                    <h1 className="text-[21px] font-semibold leading-tight tracking-tight text-[var(--md-on-surface)]">译键 TransKey</h1>
+                    <p className="text-xs text-[var(--md-on-surface-var)]">游戏快捷翻译 · 一键即译</p>
+                </div>
+            </header>
+
+            <DirectionCard delay={40} />
+
+            <footer
+                className="card-rise mt-auto px-1 pt-1 text-xs leading-relaxed text-[var(--md-on-surface-var)]"
+                style={{ animationDelay: '120ms' }}
+            >
+                使用方法：在游戏中打完文字，按翻译快捷键，输入内容会自动替换为译文。
+                引擎、快捷键与主题颜色可在「设置」中调整。
+            </footer>
+        </>
+    );
+}
+
+function SettingsPage() {
+    return (
+        <>
+            <header className="card-rise flex items-center gap-3 px-1 pb-1">
+                <IconChip><Settings02 className="w-5 h-5" /></IconChip>
+                <h1 className="text-[21px] font-semibold leading-tight tracking-tight text-[var(--md-on-surface)]">设置</h1>
+            </header>
+
+            <HotkeyCard delay={40} />
+            <EngineCard delay={90} />
+            <ThemeCard delay={140} />
+        </>
+    );
+}
+
+function NavBar({ page, setPage }) {
+    const items = [
+        { id: 'home', label: '翻译', icon: Translate },
+        { id: 'settings', label: '设置', icon: Settings02 },
+    ];
+
+    return (
+        <nav className="flex h-20 shrink-0 items-center justify-around border-t border-[var(--md-outline-var)] bg-[var(--md-surface-container)]">
+            {items.map((it) => {
+                const active = page === it.id;
+                return (
+                    <button
+                        key={it.id}
+                        onClick={() => setPage(it.id)}
+                        className="flex flex-col items-center gap-1 px-6 py-1"
+                    >
+                        <span
+                            className={`grid h-8 w-16 place-items-center rounded-full transition-colors ${active
+                                ? 'bg-[var(--md-secondary-container)]'
+                                : 'hover:bg-[color-mix(in_srgb,var(--md-on-surface)_6%,transparent)]'}`}
+                        >
+                            <it.icon
+                                className={`h-5 w-5 ${active
+                                    ? 'text-[var(--md-on-secondary-container,var(--md-on-surface))]'
+                                    : 'text-[var(--md-on-surface-var)]'}`}
+                            />
+                        </span>
+                        <span className={`text-xs ${active ? 'font-semibold text-[var(--md-on-surface)]' : 'text-[var(--md-on-surface-var)]'}`}>
+                            {it.label}
+                        </span>
+                    </button>
+                );
+            })}
+        </nav>
+    );
+}
+
 function ThemedApp() {
     const { settings } = useStore();
+    const [page, setPage] = useState('home');
     const palette = PALETTES[settings?.theme_color] || PALETTES.violet;
 
     return (
         <div
-            className="min-h-screen bg-[var(--md-surface)] text-[var(--md-on-surface)]"
+            className="flex h-screen flex-col bg-[var(--md-surface)] text-[var(--md-on-surface)]"
             style={palette.vars}
         >
             <Toaster
@@ -520,31 +601,11 @@ function ThemedApp() {
                 }}
             />
 
-            <div className="flex w-full flex-col gap-3 px-6 py-6">
-                <header className="card-rise flex items-center gap-3.5 px-1 pb-1">
-                    <img
-                        src={appIcon}
-                        alt="TransKey"
-                        className="h-11 w-11 rounded-[14px]"
-                    />
-                    <div>
-                        <h1 className="text-[21px] font-semibold leading-tight tracking-tight text-[var(--md-on-surface)]">译键 TransKey</h1>
-                        <p className="text-xs text-[var(--md-on-surface-var)]">游戏快捷翻译 · 一键即译</p>
-                    </div>
-                </header>
+            <main className="flex flex-1 flex-col gap-3 overflow-y-auto px-6 py-6">
+                {page === 'home' ? <HomePage /> : <SettingsPage />}
+            </main>
 
-                <DirectionCard delay={40} />
-                <HotkeyCard delay={90} />
-                <EngineCard delay={140} />
-                <ThemeCard delay={190} />
-
-                <footer
-                    className="card-rise px-1 pt-1 text-xs leading-relaxed text-[var(--md-on-surface-var)]"
-                    style={{ animationDelay: '240ms' }}
-                >
-                    使用方法：在游戏中打完文字，按翻译快捷键，输入内容会自动替换为译文。
-                </footer>
-            </div>
+            <NavBar page={page} setPage={setPage} />
         </div>
     );
 }
