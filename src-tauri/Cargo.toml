@@ -1,6 +1,6 @@
 [package]
 name = "transkey"
-version = "0.2.0"
+version = "0.2.1"
 description = "TransKey - instant game chat translation at a keystroke"
 authors = ["KAZANR"]
 license = "MIT"
