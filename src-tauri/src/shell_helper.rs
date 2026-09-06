@@ -5,12 +5,13 @@ use tauri_plugin_clipboard_manager::ClipboardExt;
 #[cfg(target_os = "macos")]
 use tauri_plugin_shell::ShellExt;
 
-/// 核心翻译流程：复制选中文本 -> AI 翻译 -> 结果写回剪贴板并粘贴
+/// 核心翻译流程：全选复制输入内容 -> AI 翻译 -> 全选粘贴替换为译文
 pub async fn trans_and_replace_text(app: &AppHandle) -> Result<()> {
     // 记录复制前的剪贴板内容，用于检测是否有新文本被复制进来
     let old_clipboard = app.clipboard().read_text().unwrap_or_default();
 
-    // 1. 复制选中文本
+    // 1. 全选输入框内容并复制（覆盖"打完字不选中直接按快捷键"的场景）
+    simulate_keyboard_shortcut(app, "a").await?;
     simulate_keyboard_shortcut(app, "c").await?;
 
     // 2. 轮询等待剪贴板更新（游戏窗口处理模拟按键可能较慢）
@@ -23,17 +24,18 @@ pub async fn trans_and_replace_text(app: &AppHandle) -> Result<()> {
     }
     println!("原始文本: {:?}", original_text);
 
-    // 3. 剪贴板始终没有变化且为空 -> 没有选中任何文本，直接中止避免翻译旧内容
-    if original_text.trim().is_empty() {
-        anyhow::bail!("未检测到选中的文本（剪贴板为空），请先选中要翻译的文字");
+    // 3. 剪贴板始终没有变化 -> 输入框为空，直接中止避免把旧剪贴板内容当原文翻译
+    if original_text == old_clipboard || original_text.trim().is_empty() {
+        anyhow::bail!("未检测到输入内容（输入框为空），请先输入要翻译的文字");
     }
 
     // 4. 调用AI翻译
     let translated = ai_translator::translate_with_gpt(app, &original_text).await?;
     println!("翻译结果: {:?}", translated);
 
-    // 5. 粘贴翻译结果
+    // 5. 全选并粘贴，用译文替换原文
     app.clipboard().write_text(translated)?;
+    simulate_keyboard_shortcut(app, "a").await?;
     simulate_keyboard_shortcut(app, "v").await?;
 
     Ok(())

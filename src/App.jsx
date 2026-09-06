@@ -307,9 +307,9 @@ export default function App() {
                     <HotkeyCard />
                     <EngineCard />
 
-                    <footer className="text-xs text-zinc-400 leading-relaxed px-1 pt-1">
-                        使用方法：在游戏中选中文字，按翻译快捷键，翻译结果会自动粘贴到输入框。
-                    </footer>
+                <footer className="text-xs text-zinc-400 leading-relaxed px-1 pt-1">
+                    使用方法：在游戏中打完文字，按翻译快捷键，输入内容会自动替换为译文。
+                </footer>
                 </div>
             </div>
         </StoreProvider>
