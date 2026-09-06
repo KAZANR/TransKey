@@ -4,9 +4,6 @@ use tauri::AppHandle;
 use tauri::Manager;
 
 pub fn create_tray(app: &AppHandle) -> tauri::Result<()> {
-    // let show_icon = Image::from_path("icons/window.png")?;
-    // let quit_icon = Image::from_path("icons/quit.png")?;
-
     let show_i = MenuItem::with_id(app, "show", "打开主页面", true, None::<String>)?;
 
     let quit_i = MenuItem::with_id(app, "quit", "退出", true, None::<String>)?;

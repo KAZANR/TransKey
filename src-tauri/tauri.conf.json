@@ -47,8 +47,7 @@
       },
       "files": {},
       "hardenedRuntime": true,
-      "minimumSystemVersion": "10.13",
-      "signingIdentity": "Developer ID Application: Shanghai Diyu Network Technology Co., Ltd (6UB6WM6VQR)"
+      "minimumSystemVersion": "10.13"
     },
     "windows": {
       "certificateThumbprint": null,

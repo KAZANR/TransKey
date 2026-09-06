@@ -7,16 +7,6 @@ pub mod store;
 pub mod tray;
 
 #[tauri::command]
-fn log_to_backend(message: String) {
-    println!("Frontend Log: {}", message);
-}
-
-#[tauri::command]
-fn get_version(app_handle: tauri::AppHandle) -> String {
-    app_handle.package_info().version.to_string()
-}
-
-#[tauri::command]
 async fn update_translator_shortcut(
     app_handle: tauri::AppHandle,
     keys: Vec<String>,
@@ -48,8 +38,6 @@ pub fn run() {
         .plugin(tauri_plugin_shell::init())
         // 剪贴板插件
         .plugin(tauri_plugin_clipboard_manager::init())
-        // opener插件
-        .plugin(tauri_plugin_opener::init())
         .setup(|app| {
             // 初始化存储
             println!("Initializing...");
@@ -75,9 +63,7 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             update_translator_shortcut,
-            log_to_backend,
-            get_settings,
-            get_version
+            get_settings
         ]);
 
     // 只在非Windows系统上添加窗口事件监听
