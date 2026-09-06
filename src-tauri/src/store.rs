@@ -44,6 +44,12 @@ pub struct AppSettings {
     pub translation_from: String,
     pub translation_to: String,
     pub custom_model: ModelConfig,
+    #[serde(default = "default_theme")]
+    pub theme_color: String,
+}
+
+fn default_theme() -> String {
+    "violet".to_string()
 }
 
 // v0.2.0 改名后设置目录变化：优先从旧版 DeepRant 目录迁移配置
@@ -100,6 +106,7 @@ pub fn initialize_settings(app: &AppHandle) -> Result<(), anyhow::Error> {
         "trans_hotkey": trans_hotkey,
         "translation_from": "zh",
         "translation_to": "en",
+        "theme_color": "violet",
         "custom_model": {
             "auth": "",
             "api_url": "https://api.openai.com/v1/chat/completions",

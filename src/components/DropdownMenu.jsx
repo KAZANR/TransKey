@@ -20,7 +20,7 @@ export default function DropdownMenu({
             />
             <div
                 className={twMerge(
-                    `absolute z-20 min-w-[150px] p-1.5 rounded-xl bg-white border border-zinc-200 shadow-[0_8px_30px_rgb(0,0,0,0.12)] ${placement === 'top' ? 'bottom-full mb-2' : 'top-full mt-2'} ${anchorPosition}`,
+                    `absolute z-20 min-w-[150px] rounded-xl bg-[var(--md-surface-container)] py-2 shadow-[0_4px_16px_rgba(0,0,0,0.16)] ${placement === 'top' ? 'bottom-full mb-2' : 'top-full mt-2'} ${anchorPosition}`,
                     className
                 )}
             >
@@ -30,16 +30,16 @@ export default function DropdownMenu({
                         <button
                             key={value}
                             className={twMerge(
-                                'w-full flex items-center px-3 py-2 text-[14px] rounded-lg',
+                                'flex w-full items-center px-3.5 py-2 text-sm transition-colors',
                                 isActive
-                                    ? 'text-zinc-900 font-semibold bg-zinc-100'
-                                    : 'text-zinc-700 hover:bg-zinc-100'
+                                    ? 'font-semibold text-[var(--md-primary)]'
+                                    : 'text-[var(--md-on-surface)] hover:bg-[color-mix(in_srgb,var(--md-on-surface)_8%,transparent)]'
                             )}
                             onClick={() => onSelect(value)}
                         >
                             {renderOption ? renderOption(value, label) : label}
                             {isActive && (
-                                <CheckTick className="w-5 h-5 ml-auto stroke-zinc-900" />
+                                <CheckTick className="ml-auto w-4 h-4 stroke-[var(--md-primary)]" />
                             )}
                         </button>
                     );

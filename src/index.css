@@ -2,10 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  font-family: 'Segoe UI Variable Text', 'Segoe UI', 'Microsoft YaHei UI', 'Microsoft YaHei', system-ui, sans-serif;
+}
+
 @keyframes rise {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(6px);
   }
   to {
     opacity: 1;
@@ -14,9 +18,9 @@
 }
 
 .card-rise {
-  animation: rise 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: rise 0.4s cubic-bezier(0.2, 0, 0, 1) both;
 }
 
 ::selection {
-  background: rgba(99, 102, 241, 0.2);
+  background: rgba(103, 80, 164, 0.2);
 }

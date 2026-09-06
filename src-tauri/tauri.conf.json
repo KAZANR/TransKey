@@ -13,9 +13,9 @@
     "windows": [
       {
         "title": "TransKey",
-        "width": 640,
-        "height": 720,
-        "minWidth": 420,
+        "width": 520,
+        "height": 680,
+        "minWidth": 400,
         "minHeight": 560,
         "theme": "Light",
         "visible": true,

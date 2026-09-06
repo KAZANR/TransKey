@@ -9,6 +9,14 @@
 
   <body>
     <div id="root"></div>
+    <script>
+      window.addEventListener('error', (e) => {
+        const pre = document.createElement('pre');
+        pre.id = 'err-trap';
+        pre.textContent = 'ERR: ' + e.message + '\n' + (e.error && e.error.stack || '');
+        document.body.appendChild(pre);
+      });
+    </script>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
