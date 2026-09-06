@@ -21,27 +21,13 @@ fn get_system_prompt(from: &str, to: &str) -> String {
     )
 }
 
-fn get_model_config(settings: &crate::store::AppSettings) -> crate::store::ModelConfig {
-    match settings.model_type.as_str() {
-        "siliconflow" => crate::store::ModelConfig {
-            auth: "sk-jleighwqdtyssxeycgmwxqrhbofpsbkhtobofxhbeyebupyh".to_string(),
-            api_url: "https://api.siliconflow.cn/v1/chat/completions".to_string(),
-            model_name: "Qwen/Qwen2-7B-Instruct".to_string(),
-        },
-        _ => settings.custom_model.clone(),
-    }
-}
-
 pub async fn translate_with_gpt(app: &AppHandle, original: &str) -> Result<String> {
     let settings = crate::store::get_settings(app)?;
+    let model_config = settings.custom_model.clone();
 
     println!("当前翻译设置:");
     println!("- 源语言: {}", settings.translation_from);
     println!("- 目标语言: {}", settings.translation_to);
-    println!("- 模型类型: {}", settings.model_type);
-
-    let model_config = get_model_config(&settings);
-
     println!("正在发送请求到: {}", model_config.api_url);
     println!("使用的模型: {}", model_config.model_name);
 
@@ -94,6 +80,13 @@ pub async fn translate_with_gpt(app: &AppHandle, original: &str) -> Result<Strin
                         .unwrap_or("未知API错误");
                     println!("API返回错误: {}", msg);
                     return Ok(format!("[错误] {}", msg));
+                }
+                // 硅基流动等返回顶层 {"code": ..., "message": "..."} 的错误格式
+                if json.get("choices").is_none() {
+                    if let Some(msg) = json.get("message").and_then(|m| m.as_str()) {
+                        println!("API返回错误: {}", msg);
+                        return Ok(format!("[错误] {}", msg));
+                    }
                 }
                 json
             }

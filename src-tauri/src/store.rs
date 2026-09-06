@@ -1,5 +1,6 @@
 use serde_json::{json, Value};
 use tauri::AppHandle;
+use tauri::Manager;
 use tauri_plugin_store::StoreExt;
 
 const SETTINGS_FILENAME: &str = "settings.json";
@@ -36,25 +37,61 @@ impl HotkeyConfig {
 }
 
 // 应用设置（存储在 settings.json）
-// 旧版本 settings.json 中的多余字段（phrases/scenes 等）会在反序列化时被自动忽略
+// 旧版本 settings.json 中的多余字段（phrases/scenes/model_type 等）会在反序列化时被自动忽略
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 pub struct AppSettings {
     pub trans_hotkey: HotkeyConfig,
     pub translation_from: String,
     pub translation_to: String,
-    pub model_type: String,
     pub custom_model: ModelConfig,
+}
+
+// v0.2.0 改名后设置目录变化：优先从旧版 DeepRant 目录迁移配置
+fn migrate_legacy_settings(app: &AppHandle) -> Result<(), anyhow::Error> {
+    let old_path = app
+        .path()
+        .app_data_dir()?
+        .parent()
+        .ok_or_else(|| anyhow::anyhow!("无法定位设置目录"))?
+        .join("com.DeepRant.app")
+        .join(SETTINGS_FILENAME);
+
+    let legacy: Value = serde_json::from_str(&std::fs::read_to_string(old_path)?)?;
+    let old = &legacy["settings"];
+
+    // 只保留新版 AppSettings 用到的字段，旧字段（phrases/scenes/model_type 等）丢弃
+    let migrated = json!({
+        "trans_hotkey": old["trans_hotkey"],
+        "translation_from": old["translation_from"],
+        "translation_to": old["translation_to"],
+        "custom_model": old["custom_model"],
+    });
+
+    let store = app.store(SETTINGS_FILENAME)?;
+    store.set("settings", migrated);
+    store.save()?;
+    store.close_resource();
+    Ok(())
 }
 
 // 初始化默认设置
 pub fn initialize_settings(app: &AppHandle) -> Result<(), anyhow::Error> {
-    let settings_store = app.store(SETTINGS_FILENAME)?;
-
-    let has_settings = settings_store.get("settings").is_some();
+    let has_settings = {
+        let store = app.store(SETTINGS_FILENAME)?;
+        let has = store.get("settings").is_some();
+        store.close_resource();
+        has
+    };
     if has_settings {
-        settings_store.close_resource();
         return Ok(());
     }
+
+    if migrate_legacy_settings(app).is_ok() {
+        println!("已从旧版 DeepRant 配置迁移");
+        return Ok(());
+    }
+
+    let settings_store = app.store(SETTINGS_FILENAME)?;
 
     // 创建默认快捷键配置
     let trans_hotkey = HotkeyConfig::new_platform_specific("KeyT");
@@ -63,7 +100,6 @@ pub fn initialize_settings(app: &AppHandle) -> Result<(), anyhow::Error> {
         "trans_hotkey": trans_hotkey,
         "translation_from": "zh",
         "translation_to": "en",
-        "model_type": "siliconflow",
         "custom_model": {
             "auth": "",
             "api_url": "https://api.openai.com/v1/chat/completions",

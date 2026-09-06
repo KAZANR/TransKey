@@ -5,7 +5,7 @@ import * as FlagIcons from 'country-flag-icons/react/3x2';
 import { StoreProvider, useStore } from './components/StoreProvider';
 import DropdownMenu from './components/DropdownMenu';
 import { showSuccess, showError } from './utils/toast';
-import { Translate, Repeat01, KeyboardAlt, Spinner, Ai01, Server } from './icons';
+import { Translate, Repeat01, KeyboardAlt, Spinner, Ai01 } from './icons';
 import appIcon from './assets/app-icon.png';
 
 const LANGUAGES = {
@@ -19,11 +19,6 @@ const LANGUAGES = {
     ja: { name: '日文', code: 'JP' },
     de: { name: '德文', code: 'DE' },
 };
-
-const MODEL_OPTIONS = [
-    { id: 'siliconflow', name: '硅基流动免费', desc: 'Qwen2-7B-Instruct · 开箱即用' },
-    { id: 'custom', name: '自定义模型', desc: '兼容 OpenAI 接口' },
-];
 
 const isMac = () => navigator.userAgent.toLowerCase().includes('mac');
 
@@ -50,6 +45,10 @@ const testOpenAIConnection = async (apiKey, baseUrl, modelName) => {
     const data = await response.json();
     if (data.error) {
         throw new Error(data.error.message || '未知错误');
+    }
+    if (!data.choices && data.message) {
+        // 硅基流动等返回顶层 {code, message} 的错误格式
+        throw new Error(data.message);
     }
     if (!(data.choices && data.choices[0] && data.choices[0].message)) {
         throw new Error('响应格式不正确');
@@ -212,7 +211,6 @@ function HotkeyCard() {
 
 function EngineCard() {
     const { settings, updateSettings } = useStore();
-    const activeModel = settings?.model_type || 'siliconflow';
     const [isTesting, setIsTesting] = useState(false);
     const custom = settings?.custom_model || {};
 
@@ -233,69 +231,46 @@ function EngineCard() {
 
     return (
         <Card icon={<Ai01 className="w-4 h-4 stroke-zinc-500" />} title="翻译引擎">
-            <div className="space-y-2">
-                {MODEL_OPTIONS.map((model) => (
-                    <button
-                        key={model.id}
-                        onClick={() => updateSettings({ model_type: model.id })}
-                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border text-left transition-colors ${activeModel === model.id
-                            ? 'border-zinc-900 bg-zinc-50'
-                            : 'border-zinc-200 hover:bg-zinc-50'
-                            }`}
-                    >
-                        {activeModel === model.id ? (
-                            <Server className="w-4 h-4 stroke-zinc-900 shrink-0" />
-                        ) : (
-                            <span className="w-4 h-4 rounded-full border-[1.5px] border-zinc-300 shrink-0" />
-                        )}
-                        <span className="text-sm font-medium text-zinc-900">{model.name}</span>
-                        <span className="text-xs text-zinc-400 ml-auto">{model.desc}</span>
-                    </button>
-                ))}
-            </div>
-
-            {activeModel === 'custom' && (
-                <div className="mt-4 pt-4 border-t border-zinc-100 space-y-3">
-                    <div>
-                        <label className="block text-xs text-zinc-500 mb-1.5">API Key</label>
-                        <input
-                            type="text"
-                            value={custom.auth || ''}
-                            onChange={(e) => updateSettings({ custom_model: { ...custom, auth: e.target.value } })}
-                            className="w-full px-3 py-2 bg-white border border-zinc-200 rounded-lg text-sm text-zinc-700 focus:outline-none focus:border-zinc-400"
-                            placeholder="sk-..."
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-xs text-zinc-500 mb-1.5">API 地址</label>
-                        <input
-                            type="text"
-                            value={custom.api_url || ''}
-                            onChange={(e) => updateSettings({ custom_model: { ...custom, api_url: e.target.value } })}
-                            className="w-full px-3 py-2 bg-white border border-zinc-200 rounded-lg text-sm text-zinc-700 focus:outline-none focus:border-zinc-400"
-                            placeholder="https://api.openai.com/v1/chat/completions"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-xs text-zinc-500 mb-1.5">模型名称</label>
-                        <input
-                            type="text"
-                            value={custom.model_name || ''}
-                            onChange={(e) => updateSettings({ custom_model: { ...custom, model_name: e.target.value } })}
-                            className="w-full px-3 py-2 bg-white border border-zinc-200 rounded-lg text-sm text-zinc-700 focus:outline-none focus:border-zinc-400"
-                            placeholder="gpt-4o-mini"
-                        />
-                    </div>
-                    <button
-                        onClick={handleTest}
-                        disabled={isTesting}
-                        className="w-full py-2 rounded-lg text-sm text-white bg-zinc-900 hover:bg-zinc-800 disabled:opacity-60 transition-colors flex items-center justify-center gap-2"
-                    >
-                        {isTesting && <Spinner className="w-4 h-4" />}
-                        {isTesting ? '测试中...' : '测试连接'}
-                    </button>
+            <div className="space-y-3">
+                <div>
+                    <label className="block text-xs text-zinc-500 mb-1.5">API Key</label>
+                    <input
+                        type="text"
+                        value={custom.auth || ''}
+                        onChange={(e) => updateSettings({ custom_model: { ...custom, auth: e.target.value } })}
+                        className="w-full px-3 py-2 bg-white border border-zinc-200 rounded-lg text-sm text-zinc-700 focus:outline-none focus:border-zinc-400"
+                        placeholder="sk-..."
+                    />
                 </div>
-            )}
+                <div>
+                    <label className="block text-xs text-zinc-500 mb-1.5">API 地址</label>
+                    <input
+                        type="text"
+                        value={custom.api_url || ''}
+                        onChange={(e) => updateSettings({ custom_model: { ...custom, api_url: e.target.value } })}
+                        className="w-full px-3 py-2 bg-white border border-zinc-200 rounded-lg text-sm text-zinc-700 focus:outline-none focus:border-zinc-400"
+                        placeholder="https://api.openai.com/v1/chat/completions"
+                    />
+                </div>
+                <div>
+                    <label className="block text-xs text-zinc-500 mb-1.5">模型名称</label>
+                    <input
+                        type="text"
+                        value={custom.model_name || ''}
+                        onChange={(e) => updateSettings({ custom_model: { ...custom, model_name: e.target.value } })}
+                        className="w-full px-3 py-2 bg-white border border-zinc-200 rounded-lg text-sm text-zinc-700 focus:outline-none focus:border-zinc-400"
+                        placeholder="gpt-4o-mini"
+                    />
+                </div>
+                <button
+                    onClick={handleTest}
+                    disabled={isTesting}
+                    className="w-full py-2 rounded-lg text-sm text-white bg-zinc-900 hover:bg-zinc-800 disabled:opacity-60 transition-colors flex items-center justify-center gap-2"
+                >
+                    {isTesting && <Spinner className="w-4 h-4" />}
+                    {isTesting ? '测试中...' : '测试连接'}
+                </button>
+            </div>
         </Card>
     );
 }
