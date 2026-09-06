@@ -24,7 +24,7 @@ TransKey（译键）是一款为游戏玩家打造的极简快捷翻译工具。
 
 ## 🚀 快速开始
 
-1. 从 [Releases](https://github.com/KAZANR/FC3S/releases) 下载最新版本
+1. 从 [Releases](https://github.com/KAZANR/TransKey/releases) 下载最新版本
 2. 安装并运行 TransKey
 3. 在设置页填入你的模型 API Key / 地址 / 模型名（支持任何 OpenAI 兼容接口）
 4. 进游戏，选中文字，按快捷键！
