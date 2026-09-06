@@ -42,15 +42,21 @@ const testOpenAIConnection = async (apiKey, baseUrl, modelName) => {
             max_tokens: 10,
         }),
     });
-    const data = await response.json();
+    const text = await response.text();
+    let data;
+    try {
+        data = JSON.parse(text);
+    } catch {
+        throw new Error(`服务器返回了非JSON响应 (HTTP ${response.status})`);
+    }
     if (data.error) {
         throw new Error(data.error.message || '未知错误');
     }
-    if (!data.choices && data.message) {
-        // 硅基流动等返回顶层 {code, message} 的错误格式
-        throw new Error(data.message);
+    if (!data.choices) {
+        // 硅基流动等返回顶层 {code, message} / {msg} 的错误格式
+        throw new Error(data.message || data.msg || `请求失败 (HTTP ${response.status})`);
     }
-    if (!(data.choices && data.choices[0] && data.choices[0].message)) {
+    if (!(data.choices[0] && data.choices[0].message)) {
         throw new Error('响应格式不正确');
     }
 };

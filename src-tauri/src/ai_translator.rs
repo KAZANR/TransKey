@@ -61,40 +61,15 @@ pub async fn translate_with_gpt(app: &AppHandle, original: &str) -> Result<Strin
         .post(&model_config.api_url)
         .header("Content-Type", "application/json")
         .header("Authorization", format!("Bearer {}", model_config.auth))
+        .header(
+            "User-Agent",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) TransKey/0.2",
+        )
         .json(&request_body)
         .send()
         .await
     {
-        Ok(resp) => match resp.json::<Value>().await {
-            Ok(json) => {
-                // 先检查是否有错误信息
-                if let Some(error) = json.get("error_msg").and_then(|msg| msg.as_str()) {
-                    println!("API返回错误: {}", error);
-                    return Ok(format!("[错误] {}", error));
-                }
-                // OpenAI/智谱风格的错误对象 {"error": {"message": "..."}}
-                if let Some(err_obj) = json.get("error").and_then(|e| e.as_object()) {
-                    let msg = err_obj
-                        .get("message")
-                        .and_then(|m| m.as_str())
-                        .unwrap_or("未知API错误");
-                    println!("API返回错误: {}", msg);
-                    return Ok(format!("[错误] {}", msg));
-                }
-                // 硅基流动等返回顶层 {"code": ..., "message": "..."} 的错误格式
-                if json.get("choices").is_none() {
-                    if let Some(msg) = json.get("message").and_then(|m| m.as_str()) {
-                        println!("API返回错误: {}", msg);
-                        return Ok(format!("[错误] {}", msg));
-                    }
-                }
-                json
-            }
-            Err(e) => {
-                println!("解析响应JSON失败: {}", e);
-                return Ok(format!("[错误] 服务器响应格式异常: {}", e));
-            }
-        },
+        Ok(resp) => resp,
         Err(e) => {
             let error_msg = match e.to_string().as_str() {
                 msg if msg.contains("connection refused") => "无法连接到API服务器，请检查网络设置",
@@ -107,9 +82,43 @@ pub async fn translate_with_gpt(app: &AppHandle, original: &str) -> Result<Strin
         }
     };
 
-    // 解析响应
-    println!("API响应原文: {:?}", response);
-    let translated = match response
+    let status = response.status();
+    let raw_text = match response.text().await {
+        Ok(text) => text,
+        Err(e) => {
+            println!("读取响应失败: {}", e);
+            return Ok(format!("[错误] 读取服务器响应失败: {}", e));
+        }
+    };
+    println!("HTTP状态: {}, 响应原文: {:?}", status, raw_text);
+
+    // 识别常见错误格式：智谱 error_msg / OpenAI error.message / 硅基流动顶层 message、msg
+    let json: Value = match serde_json::from_str::<Value>(&raw_text) {
+        Ok(json) => {
+            let has_choices = json.get("choices").is_some();
+            if !has_choices {
+                if let Some(msg) = json
+                    .get("error_msg")
+                    .and_then(|m| m.as_str())
+                    .or_else(|| json.pointer("/error/message").and_then(|m| m.as_str()))
+                    .or_else(|| json.get("message").and_then(|m| m.as_str()))
+                    .or_else(|| json.get("msg").and_then(|m| m.as_str()))
+                {
+                    println!("API返回错误: {}", msg);
+                    return Ok(format!("[错误] {}", msg));
+                }
+            }
+            json
+        }
+        Err(_) => {
+            let snippet: String = raw_text.chars().take(150).collect();
+            return Ok(format!(
+                "[错误] 服务器返回了非JSON响应(HTTP {}): {}",
+                status, snippet
+            ));
+        }
+    };
+    let translated = match json
         .get("choices")
         .and_then(|choices| choices.as_array())
         .and_then(|choices| choices.first())
@@ -127,8 +136,12 @@ pub async fn translate_with_gpt(app: &AppHandle, original: &str) -> Result<Strin
             }
         }
         None => {
-            println!("无法从响应中提取翻译结果: {:?}", response);
-            return Ok("[错误] 服务器返回的数据格式异常".to_string());
+            let snippet: String = raw_text.chars().take(150).collect();
+            println!("无法从响应中提取翻译结果");
+            return Ok(format!(
+                "[错误] 未能从服务器响应中提取翻译(HTTP {}): {}",
+                status, snippet
+            ));
         }
     };
 
