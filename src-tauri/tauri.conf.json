@@ -15,10 +15,8 @@
         "title": "TransKey",
         "width": 640,
         "height": 720,
-        "minWidth": 640,
-        "maxWidth": 640,
-        "minHeight": 720,
-        "maxHeight": 720,
+        "minWidth": 420,
+        "minHeight": 560,
         "theme": "Light",
         "visible": true,
         "decorations": true
