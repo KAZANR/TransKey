@@ -5,10 +5,11 @@ import * as FlagIcons from 'country-flag-icons/react/3x2';
 import { StoreProvider, useStore } from './components/StoreProvider';
 import DropdownMenu from './components/DropdownMenu';
 import { showSuccess, showError } from './utils/toast';
-import { Translate, Repeat01, KeyboardAlt, Spinner, Ai01, ChevronRight, Eye, EyeOff } from './icons';
+import { Translate, Repeat01, KeyboardAlt, Spinner, Ai01, ChevronRight, Eye, EyeOff, Globe } from './icons';
 import appIcon from './assets/app-icon.png';
 
 const LANGUAGES = {
+    auto: { name: '自动识别', code: null },
     zh: { name: '中文', code: 'CN' },
     'en-SEA': { name: '东南亚英语', code: 'SG' },
     ko: { name: '韩文', code: 'KR' },
@@ -19,6 +20,12 @@ const LANGUAGES = {
     ja: { name: '日文', code: 'JP' },
     de: { name: '德文', code: 'DE' },
 };
+
+function LangFlag({ code, className }) {
+    if (!code) return <Globe className={className || 'w-3.5 h-3.5 stroke-zinc-500'} />;
+    const FlagIcon = FlagIcons[code];
+    return <FlagIcon className="w-7 h-7 scale-[1.8]" />;
+}
 
 const isMac = () => navigator.userAgent.toLowerCase().includes('mac');
 
@@ -76,7 +83,6 @@ function Card({ icon, title, children, className = '' }) {
 function LanguagePicker({ value, onSelect }) {
     const [open, setOpen] = useState(false);
     const lang = LANGUAGES[value] || LANGUAGES.zh;
-    const FlagIcon = FlagIcons[lang.code];
 
     return (
         <div className="relative">
@@ -85,7 +91,7 @@ function LanguagePicker({ value, onSelect }) {
                 className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-zinc-50 hover:bg-zinc-100 border border-transparent hover:border-zinc-200 transition-colors"
             >
                 <span className="w-5 h-5 rounded-full overflow-hidden flex items-center justify-center bg-zinc-100">
-                    <FlagIcon className="w-7 h-7 scale-[1.8]" />
+                    <LangFlag code={lang.code} />
                 </span>
                 <span className="text-[15px] font-medium text-zinc-900">{lang.name}</span>
             </button>
@@ -96,17 +102,14 @@ function LanguagePicker({ value, onSelect }) {
                 currentValue={value}
                 onSelect={(v) => { setOpen(false); onSelect(v); }}
                 placement="bottom"
-                renderOption={(key, label) => {
-                    const OptionFlag = FlagIcons[LANGUAGES[key].code];
-                    return (
-                        <span className="flex items-center gap-2">
-                            <span className="w-4 h-4 rounded-full overflow-hidden flex items-center justify-center bg-zinc-100">
-                                <OptionFlag className="w-6 h-6 scale-[1.8]" />
-                            </span>
-                            {label}
+                renderOption={(key, label) => (
+                    <span className="flex items-center gap-2">
+                        <span className="w-4 h-4 rounded-full overflow-hidden flex items-center justify-center bg-zinc-100">
+                            <LangFlag code={LANGUAGES[key].code} />
                         </span>
-                    );
-                }}
+                        {label}
+                    </span>
+                )}
             />
         </div>
     );

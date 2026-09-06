@@ -24,8 +24,7 @@
     ]
   },
   "bundle": {
-    "createUpdaterArtifacts": false,
-    "targets": [
+    "createUpdaterArtifacts": false,    "targets": [
       "app",
       "dmg",
       "msi"
@@ -69,16 +68,5 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ]
-  },
-  "plugins": {
-    "updater": {
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDEyRUQyRTlGMEZGRjZCNUQKUldSZGEvOFBueTd0RXB1eStiY2ovR1c0M2lIK0JzTXR0TW9nTjR1QXNsbU9VOGNndG12VHg5L3UK",
-      "endpoints": [
-        "https://github.com/KAZANR/FC3S/releases/latest/download/latest.json"
-      ],
-      "windows": {
-        "installMode": "passive"
-      }
-    }
   }
 }

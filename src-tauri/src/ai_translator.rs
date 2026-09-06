@@ -4,8 +4,19 @@ use serde_json::{json, Value};
 use tauri::AppHandle;
 
 fn get_system_prompt(from: &str, to: &str) -> String {
+    // 支持 "auto"：目标自动=中文译英、其他译中；来源自动=由模型识别
+    let direction = match (from, to) {
+        ("auto", "auto") => "自动识别用户输入的语言并进行翻译：如果输入主要是中文，翻译成英文；否则翻译成中文".to_string(),
+        ("auto", t) => format!("自动识别用户输入的语言，并翻译成【{}】", t),
+        (f, "auto") => format!(
+            "将用户输入从【{}】翻译成目标语言：如果输入主要是中文，翻译成英文；否则翻译成中文",
+            f
+        ),
+        (f, t) => format!("将用户输入从【{}】翻译到【{}】", f, t),
+    };
+
     format!(
-        r#"<task>将用户输入从【{}】翻译到【{}】</task>
+        r#"<task>{}</task>
 
 <requirements>
 1. 直接输出翻译结果，禁止任何解释
@@ -17,7 +28,7 @@ fn get_system_prompt(from: &str, to: &str) -> String {
 <output_format>
 仅输出一条最终翻译结果，不要包含任何思考过程或解释
 </output_format>"#,
-        from, to
+        direction
     )
 }
 
@@ -50,7 +61,7 @@ pub async fn translate_with_gpt(app: &AppHandle, original: &str) -> Result<Strin
                 "content": original
             }
         ],
-        "max_tokens": 300,
+        "max_tokens": 500,
         "temperature": 0.3,
         "top_p": 0.3,
         "n": 1,
@@ -78,7 +89,7 @@ pub async fn translate_with_gpt(app: &AppHandle, original: &str) -> Result<Strin
                 _ => "网络请求失败",
             };
             println!("请求失败: {}", e);
-            return Ok(format!("[错误] {}", error_msg));
+            return Err(anyhow::anyhow!(error_msg));
         }
     };
 
@@ -87,7 +98,7 @@ pub async fn translate_with_gpt(app: &AppHandle, original: &str) -> Result<Strin
         Ok(text) => text,
         Err(e) => {
             println!("读取响应失败: {}", e);
-            return Ok(format!("[错误] 读取服务器响应失败: {}", e));
+            return Err(anyhow::anyhow!("读取服务器响应失败: {}", e));
         }
     };
     println!("HTTP状态: {}, 响应原文: {:?}", status, raw_text);
@@ -105,19 +116,21 @@ pub async fn translate_with_gpt(app: &AppHandle, original: &str) -> Result<Strin
                     .or_else(|| json.get("msg").and_then(|m| m.as_str()))
                 {
                     println!("API返回错误: {}", msg);
-                    return Ok(format!("[错误] {}", msg));
+                    return Err(anyhow::anyhow!(msg.to_string()));
                 }
             }
             json
         }
         Err(_) => {
             let snippet: String = raw_text.chars().take(150).collect();
-            return Ok(format!(
-                "[错误] 服务器返回了非JSON响应(HTTP {}): {}",
+            return Err(anyhow::anyhow!(format!(
+                "服务器返回了非JSON响应(HTTP {}): {}",
                 status, snippet
-            ));
+            )));
         }
     };
+
+    // 解析响应
     let translated = match json
         .get("choices")
         .and_then(|choices| choices.as_array())
@@ -138,10 +151,10 @@ pub async fn translate_with_gpt(app: &AppHandle, original: &str) -> Result<Strin
         None => {
             let snippet: String = raw_text.chars().take(150).collect();
             println!("无法从响应中提取翻译结果");
-            return Ok(format!(
-                "[错误] 未能从服务器响应中提取翻译(HTTP {}): {}",
+            return Err(anyhow::anyhow!(format!(
+                "未能从服务器响应中提取翻译(HTTP {}): {}",
                 status, snippet
-            ));
+            )));
         }
     };
 

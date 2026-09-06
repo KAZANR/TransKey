@@ -33,7 +33,16 @@ pub fn run() {
     println!("Starting application...");
 
     let builder = tauri::Builder::default()
-        .plugin(tauri_plugin_updater::Builder::new().build())
+        // 单实例锁：重复启动时聚焦已有窗口（必须最先注册）
+        .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
+            use tauri::Manager;
+            if let Some(window) = app.get_webview_window("main") {
+                let _ = window.show();
+                let _ = window.set_focus();
+            }
+        }))
+        .plugin(tauri_plugin_window_state::Builder::default().build())
+        .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .plugin(tauri_plugin_store::Builder::default().build())
         .plugin(tauri_plugin_shell::init())
