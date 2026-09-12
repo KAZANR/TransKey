@@ -100,16 +100,27 @@ pub fn run() {
             get_settings
         ]);
 
-    // 只在非Windows系统上添加窗口事件监听
-    #[cfg(not(target_os = "windows"))]
+    // 关闭窗口时：macOS 始终隐藏到托盘；Windows/Linux 按设置决定是否隐藏到托盘
     let builder = builder.on_window_event(|window, event| match event {
         tauri::WindowEvent::CloseRequested { api, .. } => {
-            window.hide().unwrap();
             #[cfg(target_os = "macos")]
-            let _ = window
-                .app_handle()
-                .set_activation_policy(tauri::ActivationPolicy::Accessory);
-            api.prevent_close();
+            {
+                window.hide().unwrap();
+                let _ = window
+                    .app_handle()
+                    .set_activation_policy(tauri::ActivationPolicy::Accessory);
+                api.prevent_close();
+            }
+            #[cfg(not(target_os = "macos"))]
+            {
+                let minimize = store::get_settings(window.app_handle())
+                    .map(|s| s.close_to_tray)
+                    .unwrap_or(false);
+                if minimize {
+                    let _ = window.hide();
+                    api.prevent_close();
+                }
+            }
         }
         _ => {}
     });

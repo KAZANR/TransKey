@@ -15,6 +15,7 @@ import {
     Loader2,
     ChevronDown,
     CircleCheck,
+    AppWindow,
 } from 'lucide-react';
 import { StoreProvider, useStore } from './components/StoreProvider';
 import { Button } from './components/ui/button';
@@ -25,6 +26,7 @@ import { Badge } from './components/ui/badge';
 import { Separator } from './components/ui/separator';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './components/ui/dropdown-menu';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './components/ui/collapsible';
+import { Switch } from './components/ui/switch';
 import { showSuccess, showError } from './utils/toast';
 import appIcon from './assets/app-icon.png';
 
@@ -370,6 +372,38 @@ function EngineGroup({ delay = 0 }) {
     );
 }
 
+function GeneralGroup({ delay = 0 }) {
+    const { settings, updateSettings } = useStore();
+    const closeToTray = settings ? settings.close_to_tray !== false : true;
+
+    return (
+        <Card className="card-rise" style={{ animationDelay: `${delay}ms` }}>
+            <div className="flex items-center gap-3 px-4 py-3.5">
+                <IconTile gradient="from-slate-400 to-slate-600">
+                    <Settings2 className="h-5 w-5" />
+                </IconTile>
+                <p className="flex-1 text-sm font-semibold">通用</p>
+            </div>
+            <InsetDivider />
+            <div className="flex items-center gap-3 px-4 py-3.5">
+                <IconTile gradient="from-indigo-400 to-blue-500">
+                    <AppWindow className="h-5 w-5" />
+                </IconTile>
+                <div className="flex-1">
+                    <p className="text-sm font-medium">关闭时最小化到托盘</p>
+                    <p className="text-xs text-muted-foreground">
+                        点击关闭按钮隐藏到任务栏，后台继续提供翻译
+                    </p>
+                </div>
+                <Switch
+                    checked={closeToTray}
+                    onCheckedChange={(v) => updateSettings({ close_to_tray: v })}
+                />
+            </div>
+        </Card>
+    );
+}
+
 /* MIUI 澎湃OS 渐变 Hero 卡 */
 function HeroCard() {
     const { settings } = useStore();
@@ -418,6 +452,7 @@ function SettingsPage() {
         <div className="flex flex-col gap-3 pt-6">
             <HotkeyGroup delay={40} />
             <EngineGroup delay={90} />
+            <GeneralGroup delay={140} />
         </div>
     );
 }

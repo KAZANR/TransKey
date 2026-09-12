@@ -46,10 +46,17 @@ pub struct AppSettings {
     pub custom_model: ModelConfig,
     #[serde(default = "default_theme")]
     pub theme_color: String,
+    // 点击关闭按钮时隐藏到托盘而不是退出（默认开启）
+    #[serde(default = "default_close_to_tray")]
+    pub close_to_tray: bool,
 }
 
 fn default_theme() -> String {
     "violet".to_string()
+}
+
+fn default_close_to_tray() -> bool {
+    true
 }
 
 // v0.2.0 改名后设置目录变化：优先从旧版 DeepRant 目录迁移配置
@@ -107,6 +114,7 @@ pub fn initialize_settings(app: &AppHandle) -> Result<(), anyhow::Error> {
         "translation_from": "zh",
         "translation_to": "en",
         "theme_color": "violet",
+        "close_to_tray": true,
         "custom_model": {
             "auth": "",
             "api_url": "https://api.openai.com/v1/chat/completions",
