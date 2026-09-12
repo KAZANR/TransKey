@@ -1,9 +1,112 @@
+@import 'misans/lib/Normal/MiSans-Regular.min.css';
+@import 'misans/lib/Normal/MiSans-Medium.min.css';
+@import 'misans/lib/Normal/MiSans-Semibold.min.css';
+@import 'misans/lib/Normal/MiSans-Bold.min.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  font-family: 'Segoe UI Variable Text', 'Segoe UI', 'Microsoft YaHei UI', 'Microsoft YaHei', system-ui, sans-serif;
+@layer base {
+  :root {
+    /* MIUI 澎湃OS 风格：浅灰背景 + MIUI 蓝 */
+    --background: 240 12% 95%;
+    --foreground: 240 10% 8%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 8%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 8%;
+    --primary: 217 100% 60%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 240 8% 92%;
+    --secondary-foreground: 240 10% 8%;
+    --muted: 240 8% 92%;
+    --muted-foreground: 240 4% 46%;
+    --accent: 211 100% 92%;
+    --accent-foreground: 217 100% 34%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 6% 90%;
+    --input: 240 6% 90%;
+    --ring: 217 100% 60%;
+    --radius: 1rem;
+  }
+
+  [data-theme='violet'] {
+    --primary: 262.1 83.3% 57.8%;
+    --ring: 262.1 83.3% 57.8%;
+    --accent: 262.5 79% 92%;
+    --accent-foreground: 262.6 83% 35%;
+  }
+
+  [data-theme='blue'] {
+    --primary: 217 100% 60%;
+    --ring: 217 100% 60%;
+    --accent: 211 100% 92%;
+    --accent-foreground: 217 100% 34%;
+  }
+
+  [data-theme='zinc'] {
+    --primary: 240 5.9% 10%;
+    --ring: 240 5.9% 10%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
+  }
+
+  [data-theme='green'] {
+    --primary: 142.1 76.2% 36.3%;
+    --ring: 142.1 76.2% 36.3%;
+    --accent: 138.5 76.5% 92.1%;
+    --accent-foreground: 148.7 57.5% 19.6%;
+  }
+
+  [data-theme='rose'] {
+    --primary: 346.8 77.2% 49.4%;
+    --ring: 346.8 77.2% 49.4%;
+    --accent: 355.6 100% 94.7%;
+    --accent-foreground: 347 77.5% 30.4%;
+  }
+
+  [data-theme='amber'] {
+    --primary: 32.1 94.6% 43.7%;
+    --ring: 32.1 94.6% 43.7%;
+    --accent: 47.9 95.8% 88.6%;
+    --accent-foreground: 26 89.4% 26.5%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'MiSans', 'Segoe UI', 'Microsoft YaHei UI', 'Microsoft YaHei',
+      system-ui, -apple-system, sans-serif;
+  }
+
+  ::selection {
+    background: hsl(var(--primary) / 0.15);
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--foreground) / 0.18);
+    border-radius: 999px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
 }
 
 @keyframes rise {
@@ -18,9 +121,5 @@
 }
 
 .card-rise {
-  animation: rise 0.4s cubic-bezier(0.2, 0, 0, 1) both;
-}
-
-::selection {
-  background: rgba(103, 80, 164, 0.2);
+  animation: rise 0.35s cubic-bezier(0.2, 0, 0, 1) both;
 }
