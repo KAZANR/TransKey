@@ -13,10 +13,10 @@
     "windows": [
       {
         "title": "TransKey",
-        "width": 520,
-        "height": 680,
-        "minWidth": 400,
-        "minHeight": 560,
+        "width": 560,
+        "height": 800,
+        "minWidth": 460,
+        "minHeight": 640,
         "theme": "Light",
         "backgroundColor": "#F1F1F4",
         "visible": true,
