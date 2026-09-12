@@ -19,6 +19,36 @@ async fn get_settings(app_handle: tauri::AppHandle) -> Result<store::AppSettings
     store_get_settings(&app_handle).map_err(|e| e.to_string())
 }
 
+// Windows：标题栏/边框使用应用底色，避免跟随系统强调色（如紫色主题）
+#[cfg(target_os = "windows")]
+fn apply_window_chrome_color(app: &tauri::AppHandle) {
+    use windows_sys::Win32::Graphics::Dwm::{
+        DwmSetWindowAttribute, DWMWA_BORDER_COLOR, DWMWA_CAPTION_COLOR, DWMWA_TEXT_COLOR,
+    };
+    if let Some(win) = app.get_webview_window("main") {
+        if let Ok(hwnd) = win.hwnd() {
+            // COLORREF 为 0x00BBGGRR：#F1F1F4（应用底色）与 #181818（标题文字）
+            let caption = 0x00F4_F1F1u32;
+            let text = 0x0018_1818u32;
+            unsafe {
+                let hwnd = hwnd.0 as windows_sys::Win32::Foundation::HWND;
+                for (attr, value) in [
+                    (DWMWA_CAPTION_COLOR, caption),
+                    (DWMWA_BORDER_COLOR, caption),
+                    (DWMWA_TEXT_COLOR, text),
+                ] {
+                    let _ = DwmSetWindowAttribute(
+                        hwnd,
+                        attr as u32,
+                        &value as *const u32 as *const core::ffi::c_void,
+                        4,
+                    );
+                }
+            }
+        }
+    }
+}
+
 pub fn run() {
     println!("Starting application...");
 
@@ -58,6 +88,10 @@ pub fn run() {
                 Ok(_) => println!("托盘创建成功"),
                 Err(e) => eprintln!("创建托盘失败: {}", e),
             }
+
+            // Windows：标题栏/边框颜色与应用底色一致
+            #[cfg(target_os = "windows")]
+            apply_window_chrome_color(&app.app_handle());
 
             Ok(())
         })

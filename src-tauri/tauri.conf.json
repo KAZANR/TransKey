@@ -18,6 +18,7 @@
         "minWidth": 400,
         "minHeight": 560,
         "theme": "Light",
+        "backgroundColor": "#F1F1F4",
         "visible": true,
         "decorations": true
       }
