@@ -11,8 +11,8 @@
       />
     </dependentAssembly>
   </dependency>
-  <!-- 游戏多为管理员权限运行（反作弊），普通权限进程无法向其模拟按键，
-       因此要求以管理员身份启动（UAC 提权提示） -->
+  <!-- Games often run elevated (anti-cheat); UIPI blocks non-elevated
+       processes from sending input to them, so request admin rights. -->
   <trustInfo xmlns="urn:schemas-microsoft-com:asm.v3">
     <security>
       <requestedPrivileges>
